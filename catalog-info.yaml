@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: app-003
+  annotations:
+    github.com/project-slug: gy-org/app-003
+    backstage.io/kubernetes-label-selector: 'app=app-003'
+  description: app-003 created
+spec:
+  type: service
+  owner: user:guest
+  lifecycle: experimental
+  # dependsOn:
+  #   - crossplane-eks-demo-02
