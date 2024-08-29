@@ -43,13 +43,17 @@ jobs:
           export AWS_SECRET_ACCESS_KEY=$(echo $role | jq -r .Credentials.SecretAccessKey)
           export AWS_SESSION_TOKEN=$(echo $role | jq -r .Credentials.SessionToken)
           aws eks update-kubeconfig --name ${{ github.event.inputs.clusterName }} --region ${{ github.event.inputs.region }}
-          roleinfo=$(aws sts get-caller-identity)
-          arn=$(echo $roleinfo | jq -r '.Arn')
-          aws eks create-access-entry --cluster-name ${{ github.event.inputs.clusterName }}  --principal-arn $arn --region ${{ github.event.inputs.region }}  --type STANDARD --username $arn
-          aws eks associate-access-policy --cluster-name ${{ github.event.inputs.clusterName }}  --region ${{ github.event.inputs.region }}   --principal-arn $arn --access-scope type=cluster --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy
+          # roleinfo=$(aws sts get-caller-identity)
+          # arn=$(echo $roleinfo | jq -r '.Arn')
+          aws eks create-access-entry --cluster-name ${{ github.event.inputs.clusterName }}  --principal-arn arn:aws:iam::625011733915:role/idp-demo --region ${{ github.event.inputs.region }}  --type STANDARD --username $arn
+          aws eks associate-access-policy --cluster-name ${{ github.event.inputs.clusterName }}  --region ${{ github.event.inputs.region }}   --principal-arn arn:aws:iam::625011733915:role/idp-demo --access-scope type=cluster --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy
         continue-on-error: true
       - name: Deployment app
         run: |
+          role1=$(aws sts assume-role --role-arn arn:aws:iam::625011733915:role/idp-demo --role-session-name my-seesion-test2)
+          export AWS_ACCESS_KEY_ID=$(echo $role1 | jq -r .Credentials.AccessKeyId)
+          export AWS_SECRET_ACCESS_KEY=$(echo $role1 | jq -r .Credentials.SecretAccessKey)
+          export AWS_SESSION_TOKEN=$(echo $role1 | jq -r .Credentials.SessionToken)
           export IMAGE=${{ github.event.inputs.image }}
           export APP_NAME=${{ github.event.inputs.appName }}
           envsubst < app/deployment.yaml | kubectl apply -f - 
